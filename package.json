@@ -1,0 +1,29 @@
+{
+  "name": "tutorweb.android",
+  "version": "1.0.0",
+  "description": "Apache Cordova Android wrapper for the tutorweb.quiz client-side app",
+  "main": "index.js",
+  "scripts": {
+    "build": "bin/build.sh",
+    "prepare": "cordova prepare",
+    "build:android": "cordova build android",
+    "run:android": "cordova run android",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cordova",
+    "tutorweb"
+  ],
+  "homepage": "http://www.tutor-web.net/",
+  "author": "Jamie Lentin <jamie.lentin@shuttlethread.com>",
+  "license": "GPL-2.0",
+  "devDependencies": {
+    "cordova": "^13.0.0",
+    "cordova-android": "^15.1.0"
+  },
+  "cordova": {
+    "platforms": [
+      "android"
+    ]
+  }
+}

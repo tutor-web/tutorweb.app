@@ -1,0 +1,12 @@
+.DS_Store
+/node_modules/
+
+# Cordova directories
+/plugins/
+/platforms/
+
+# Tutorweb submodules
+/tutorweb.*
+
+# Built output
+/www
