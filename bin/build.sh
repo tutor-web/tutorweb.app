@@ -13,6 +13,7 @@ QUIZ_RES="$QUIZ_CHECKOUT/tutorweb/quiz/resources"
 WWW="$HERE/www"
 
 PORTAL_ROOT="${PORTAL_ROOT:-https://tutor-web.net/}"
+AD_UNIT_ID_ANDROID="${AD_UNIT_ID_ANDROID:-ca-app-pub-3940256099942544/1033173712}"
 
 [ -d "$QUIZ_CHECKOUT" ] || git clone https://github.com/tutor-web/tutorweb.quiz "$QUIZ_CHECKOUT"
 make -C "$QUIZ_CHECKOUT"
@@ -20,13 +21,15 @@ make -C "$QUIZ_CHECKOUT"
 rm -rf "$WWW"
 mkdir -p "$WWW"
 cp -a "$QUIZ_RES"/*.css "$QUIZ_RES"/*.js "$QUIZ_RES"/*.jpg "$QUIZ_RES"/*.png "$WWW/"
+cp -a "$HERE/src/"*.js "$WWW/"
 rm -f "$WWW/tw.js.map.js"  # debug build artifact, not needed to ship
 
 # Replace TWEXTRA with our configuration
 for f in "${QUIZ_RES}/coin.html" "${QUIZ_RES}/quiz.html" "${QUIZ_RES}/start.html"; do
   sed "s|<!-- TWEXTRA -->|\\
-  <script>twConfig = { portalRoot: '${PORTAL_ROOT}' };</script>\\
+  <script>twConfig = { portalRoot: '${PORTAL_ROOT}', adUnitIdAndroid: '${AD_UNIT_ID_ANDROID}' };</script>\\
   <script src='cordova.js'></script>\\
+  <script src='twads.js'></script>\\
   |" "$f" > "${WWW}/$(basename "$f")"
 done
 

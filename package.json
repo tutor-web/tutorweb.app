@@ -18,12 +18,19 @@
   "author": "Jamie Lentin <jamie.lentin@shuttlethread.com>",
   "license": "GPL-2.0",
   "devDependencies": {
+    "admob-plus-cordova": "^1.9.2",
     "cordova": "^13.0.0",
     "cordova-android": "^15.1.0"
   },
   "cordova": {
     "platforms": [
       "android"
-    ]
+    ],
+    "plugins": {
+      "admob-plus-cordova": {
+        "APP_ID_ANDROID": "ca-app-pub-3940256099942544~3347511713",
+        "PLAY_SERVICES_VERSION": "20.0.0"
+      }
+    }
   }
 }
