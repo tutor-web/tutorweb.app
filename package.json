@@ -30,7 +30,11 @@
       "admob-plus-cordova": {
         "APP_ID_ANDROID": "ca-app-pub-3940256099942544~3347511713",
         "PLAY_SERVICES_VERSION": "20.0.0"
-      }
+      },
+      "cordova-plugin-inappbrowser": {}
     }
+  },
+  "dependencies": {
+    "cordova-plugin-inappbrowser": "7.0.0"
   }
 }
