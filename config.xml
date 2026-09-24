@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="net.tutorweb.quiz" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>TutorWeb Quiz</name>
+    <name>SmileyTutor</name>
     <description>
-        Android wrapper for the Tutor-Web quiz client, https://github.com/tutor-web/tutorweb.quiz
+        SmileyTutor mathematics drills
     </description>
-    <author email="jamie.lentin@shuttlethread.com" href="http://www.tutor-web.net/">
-        Tutor-Web
+    <author email="education.in.a.suitcase@gmail.com" href="http://www.tutor-web.net/">
+        SmileyTutor
     </author>
     <content src="start.html" />
     <access origin="*" />
@@ -21,5 +21,18 @@
     <platform name="android">
         <allow-intent href="market:*" />
         <engine name="android" spec="^15.1.0" />
+        <icon density="ldpi" src="res/android/ic_launcher.png" background="res/android/ic_launcher_background.xml" foreground="res/android/ic_launcher_foreground.xml" monochrome="res/android/ic_launcher_foreground.xml" />
+        <icon density="mdpi" src="res/android/ic_launcher.png" background="res/android/ic_launcher_background.xml" foreground="res/android/ic_launcher_foreground.xml" monochrome="res/android/ic_launcher_foreground.xml" />
+        <icon density="hdpi" src="res/android/ic_launcher.png" background="res/android/ic_launcher_background.xml" foreground="res/android/ic_launcher_foreground.xml" monochrome="res/android/ic_launcher_foreground.xml" />
+        <icon density="xhdpi" src="res/android/ic_launcher.png" background="res/android/ic_launcher_background.xml" foreground="res/android/ic_launcher_foreground.xml" monochrome="res/android/ic_launcher_foreground.xml" />
+        <icon density="xxhdpi" src="res/android/ic_launcher.png" background="res/android/ic_launcher_background.xml" foreground="res/android/ic_launcher_foreground.xml" monochrome="res/android/ic_launcher_foreground.xml" />
+        <icon density="xxxhdpi" src="res/android/ic_launcher.png" background="res/android/ic_launcher_background.xml" foreground="res/android/ic_launcher_foreground.xml" monochrome="res/android/ic_launcher_foreground.xml" />
+        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/android/splashscreen_icon.xml" />
+        <preference name="AndroidWindowSplashScreenBackground" value="#72c6df" />
+        <config-file target="res/values/cdv_themes.xml" parent="/resources/style[@name='Theme.Cordova.App.DayNight']">
+            <item name="colorPrimary">#72c6df</item>
+            <item name="colorPrimaryDark">#508B9C</item>
+            <item name="colorAccent">#344795</item>
+        </config-file>
     </platform>
 </widget>
