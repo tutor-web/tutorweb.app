@@ -55,3 +55,18 @@ incus config device add ui-tutorweb-app lg-adb usb vendorid=1004 productid=633e
 adb install platforms/android/app/build/outputs/apk/debug/app-debug.apk
 adb logcat -t0 -s chromium:* CordovaLog:*
 ```
+
+## Building a signed release bundle
+
+If not already present, a keystore should be generated with:
+
+```sh
+keytool -genkeypair -v -keystore upload-keystore.jks \
+  -alias smileytutor -keyalg RSA -keysize 2048 -validity 9125
+``
+
+Then `app-release.aab` can be generated with:
+
+```sh
+ANDROID_KEYSTORE_PASSWORD=... bin/build.sh release
+```

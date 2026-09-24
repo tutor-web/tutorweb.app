@@ -47,5 +47,32 @@ chmod a+rX www/
 echo "Synced $QUIZ_RES -> $WWW (portalRoot: $PORTAL_ROOT)"
 
 npx cordova build android
-
 echo "Built $HERE/platforms/android/app/build/outputs/apk/debug/app-debug.apk"
+
+if [ "$1" = "release" ]; then
+  : "${ANDROID_KEYSTORE-$HERE/upload-keystore.jks}"
+  : "${ANDROID_KEYSTORE_PASSWORD:?Set ANDROID_KEYSTORE_PASSWORD}"
+  : "${ANDROID_KEY_ALIAS-smileytutor}"
+  : "${ANDROID_KEY_PASSWORD-${ANDROID_KEYSTORE_PASSWORD}}"
+
+  # Cordova only accepts signing credentials via a buildConfig JSON file, so
+  # write one to a private tempfile rather than ever putting passwords in
+  # the repo. Cleaned up on exit either way.
+  BUILD_JSON="$(mktemp)"
+  trap 'rm -f "$BUILD_JSON"' EXIT
+  cat > "$BUILD_JSON" <<JSON
+{
+  "android": {
+    "release": {
+      "keystore": "$ANDROID_KEYSTORE",
+      "storePassword": "$ANDROID_KEYSTORE_PASSWORD",
+      "alias": "$ANDROID_KEY_ALIAS",
+      "password": "$ANDROID_KEY_PASSWORD"
+    }
+  }
+}
+JSON
+
+  npx cordova build android --release --buildConfig="$BUILD_JSON" -- --packageType=bundle
+  echo "Built $HERE/platforms/android/app/build/outputs/bundle/release/app-release.aab"
+fi

@@ -5,6 +5,10 @@
 /plugins/
 /platforms/
 
+# Signing keystore
+*.jks
+*.keystore
+
 # Tutorweb submodules
 /tutorweb.*
 
