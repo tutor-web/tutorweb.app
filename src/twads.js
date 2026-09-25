@@ -36,7 +36,19 @@
             setTimeout(loadNext, 30000); // Back off, then try preloading again
         });
 
-        loadNext();
+        // All users of this app are teenagers (13-17), not general-audience
+        // adults: request non-personalized, age-appropriate ads rather than
+        // the SDK's default. Must be set before admob.start() so it applies
+        // to the SDK's initial configuration.
+        admob.configRequest({
+            tagForChildDirectedTreatment: false, // COPPA "child-directed": app isn't aimed at under-13s
+            tagForUnderAgeOfConsent: true, // disables personalised/behavioural ads for these users
+            maxAdContentRating: 'T' // Teen
+        }).then(function () {
+            return admob.start();
+        }).then(loadNext)['catch'](function (e) {
+            console.warn("AdMob init failed", e);
+        });
     }, false);
 
     window.twAds = {
