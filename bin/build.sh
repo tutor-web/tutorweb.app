@@ -46,6 +46,8 @@ chmod a+rX www/
 
 echo "Synced $QUIZ_RES -> $WWW (portalRoot: $PORTAL_ROOT)"
 
+[ -d "$HERE/platforms/android" ] || npx cordova platform add android
+
 npx cordova build android
 echo "Built $HERE/platforms/android/app/build/outputs/apk/debug/app-debug.apk"
 

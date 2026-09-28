@@ -1,0 +1,98 @@
+# Required repository secrets for the signed release build:
+#
+#   ANDROID_KEYSTORE_BASE64 — base64-encoded signing keystore.
+#     Generate the keystore first (see README.md "Building a signed
+#     release bundle"), then run:
+#       base64 -w0 upload-keystore.jks
+#     and paste the output as the secret value.
+#
+#   ANDROID_KEYSTORE_PASSWORD — the store/key password set when creating
+#     the keystore (the value given to `keytool -genkeypair` for
+#     -storepass/-keypass, or entered interactively if prompted).
+#
+name: Build Android app
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ANDROID_PLATFORM_VERSION: "36"
+  ANDROID_BUILD_TOOLS_VERSION: "36.0.0"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools emulator'
+
+      - name: Cache Android SDK platform & build-tools
+        id: android-sdk-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.ANDROID_HOME }}/platforms/android-${{ env.ANDROID_PLATFORM_VERSION }}
+            ${{ env.ANDROID_HOME }}/build-tools/${{ env.ANDROID_BUILD_TOOLS_VERSION }}
+          key: android-sdk-platform${{ env.ANDROID_PLATFORM_VERSION }}-buildtools${{ env.ANDROID_BUILD_TOOLS_VERSION }}
+
+      - name: Install Android SDK platform & build-tools
+        # Skipped on a cache hit — this is the step that would otherwise
+        # hit Google's servers on every run.
+        if: steps.android-sdk-cache.outputs.cache-hit != 'true'
+        run: sdkmanager --install "platforms;android-${ANDROID_PLATFORM_VERSION}" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
+
+      - run: npm ci
+
+      - name: Restore signing keystore
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: base64 -d <<< "${ANDROID_KEYSTORE_BASE64}" > upload-keystore.jks
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
+      - name: Build debug APK
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        run: bin/build.sh
+
+      - name: Build signed release bundle
+        # Also produces the debug APK along the way (see bin/build.sh).
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: bin/build.sh release
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f upload-keystore.jks
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
+
+      - uses: actions/upload-artifact@v4
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          name: app-release
+          path: platforms/android/app/build/outputs/bundle/release/app-release.aab

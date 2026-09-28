@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "build": "bin/build.sh",
-    "prepare": "cordova prepare",
     "build:android": "cordova build android",
     "run:android": "cordova run android",
     "test": "echo \"Error: no test specified\" && exit 1"
