@@ -1,12 +1,5 @@
 # Play Store listing — net.tutorweb.quiz (SmileyTutor)
 
-Field-by-field worksheet for the Play Console "Main store listing" and "App
-content" sections. Sourced from `config.xml`, `privacy.md`, the AdMob work
-done in `src/twads.js`, and the submission checklist artifact
-(https://claude.ai/artifact/RwfPgCzKE3yFpha7keSSgt). Where a value is already
-fixed elsewhere in the repo it's filled in directly; everything else is
-flagged **NEEDS INPUT**.
-
 ## Main store listing
 
 ### App name
@@ -14,25 +7,42 @@ flagged **NEEDS INPUT**.
 SmileyTutor
 
 ### Short description (≤ 80 characters)
-**NEEDS INPUT.** Draft to review/replace:
-> Free maths drills and quizzes for students, from the SmileyCharity team.
 
-(66 characters — leaves room to tune.)
+Practise maths, build your skills and earn SmileyCoin rewards as you learn.
 
 ### Full description (≤ 4000 characters)
-**NEEDS INPUT.** `config.xml` only has the terse `<description>SmileyTutor
-mathematics drills</description>` — expand this into real listing copy: what
-the app does, who it's for (students, teens), the SmileyCoin
-reward/motivation angle, that it's produced by SmileyCharity, and that it's
-free and ad-supported. Keep it consistent with the Teen (13–17) audience
-declared below — avoid copy that reads as aimed at young children.
+
+Build your maths skills, one question at a time.
+
+SmileyTutor brings the tutor-web learning platform to an easier-to-use app. Designed for teenage students, it combines maths drills, quizzes and learning rewards to help you practise regularly and work towards a stronger understanding.
+
+PRACTISE AT YOUR OWN PACE
+Choose from the available maths topics, answer questions and keep working on areas you find challenging. Use SmileyTutor alongside your classes, for revision or for extra practice. 
+
+LEARN THROUGH PRACTICE
+Check your answers, learn from feedback and follow your progress. Repeated practice helps you move beyond remembering an answer towards understanding how to solve a problem. 
+
+ACE DRILLSETS TO EARN REWARDS
+SmileyTutor includes SmileyCoin (SMLY), a digital token used to reward learning achievements. Rewards add motivation to your practice and recognise your progress. Students use SmileyCoin to purchase essentials in SmileyStores run by SmileyCharity. 
+
+BUILT ON EDUCATIONAL RESEARCH
+
+SmileyTutor builds on tutor-web, a learning platform developed through years of educational research and classroom experience. Its focus is simple: giving students more opportunities to practise and learn. 
+
+FREE TO USE, SUPPORTED BY ADS
+SmileyTutor is free and contains advertising. Advertising revenue helps support the project and its educational work.
+
+Produced by SmileyCharity, this app is part of a wider effort to make learning opportunities more accessible.
+
+Start with a topic, try a quiz and take the next step in your learning.
 
 ### App icon (512×512, 32-bit PNG with alpha)
 
     listing/smileytutor-icon.png
 
 ### Phone screenshots (min 2, max 8; JPEG or 24-bit PNG)
-**NEEDS INPUT.** Capture from a real signed build once the production AdMob
+
+**TODO:** Capture from a real signed build once the production AdMob
 IDs are in (see build checklist). Suggested shots: start/home screen, an
 active quiz, and the SmileyCoin reward screen.
 
@@ -49,7 +59,8 @@ active quiz, and the SmileyCoin reward screen.
 - **Website:** http://www.tutor-web.net/
 
 ### External marketing opt-out
-**NEEDS INPUT** — decide whether Google may feature the app in its own
+
+**TODO:** — decide whether Google may feature the app in its own
 promotional placements; no signal either way in this repo.
 
 ## App content & policy declarations
