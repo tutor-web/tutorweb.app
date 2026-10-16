@@ -15,6 +15,19 @@ WWW="$HERE/www"
 PORTAL_ROOT="${PORTAL_ROOT:-https://tutor-web.net/}"
 AD_UNIT_ID_ANDROID="${AD_UNIT_ID_ANDROID:-ca-app-pub-3940256099942544/1033173712}"
 
+# Tutorials to bundle as seed content, so the app has drills before it has
+# talked to a server. Space-separated portal paths, e.g.
+#   SEED_TUTORIALS="math/math099.1 math/math100.1" bin/build.sh
+# Empty (the default) builds without any, as before.
+SEED_TUTORIALS="${SEED_TUTORIALS:-}"
+# Where under www/ the dumps are unpacked, and so the URI prefix the app will
+# find them at. APP_ROOT must match config.xml's Hostname preference (served
+# over https unless AndroidInsecureFileModeEnabled is set).
+SEED_DIR="${SEED_DIR:-content}"
+APP_ROOT="${APP_ROOT:-https://tutorweb-quiz-app/}"
+# Set for a test server with a self-signed certificate
+SEED_INSECURE="${SEED_INSECURE:-}"
+
 [ -d "$QUIZ_CHECKOUT" ] || git clone https://github.com/tutor-web/tutorweb.quiz "$QUIZ_CHECKOUT"
 make -C "$QUIZ_CHECKOUT"
 
@@ -40,6 +53,26 @@ while IFS= read -r rel; do
     mkdir -p "$WWW/mathjax/$(dirname "$rel")"
     cp "$QUIZ_RES/mathjax/$rel" "$WWW/mathjax/$rel"
 done
+
+# Fetch each tutorial's seed content into one shared directory. Questions are
+# keyed by their home lecture, which is often in a different tutorial, so the
+# dumps deliberately share directories and must not be unpacked separately.
+if [ -n "$SEED_TUTORIALS" ]; then
+    command -v python3 >/dev/null || {
+        echo "python3 is needed to fetch seed content (SEED_TUTORIALS is set)" >&2
+        exit 1
+    }
+    for tutorial in $SEED_TUTORIALS; do
+        # NB: fetch-tutorial.py exits non-zero on a partial dump, and set -e
+        # means that fails the build rather than shipping half a tutorial
+        "$HERE/bin/fetch-tutorial.py" \
+            "${PORTAL_ROOT%/}/${tutorial}/@@quizdb-tutorial-dump" \
+            --output "$WWW/$SEED_DIR" \
+            --base "${APP_ROOT%/}/${SEED_DIR}/" \
+            ${SEED_INSECURE:+--insecure}
+    done
+    echo "Seeded $SEED_TUTORIALS -> $WWW/$SEED_DIR (base: ${APP_ROOT%/}/${SEED_DIR}/)"
+fi
 
 # Allow hosting via. nginx too
 chmod a+rX www/
