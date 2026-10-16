@@ -11,6 +11,10 @@ home lecture, which is often in another tutorial, so tutorials genuinely do
 share directories. Nothing stale is cleaned up as a result: start from an
 empty directory for a clean build.
 
+Alongside the dump it maintains a subscriptions.json in the same shape
+@@quizdb-subscriptions returns - a tree of tutorials and their lectures -
+adding each tutorial as it is fetched.
+
 Errors are reported, never written out. The dump streams, so a failure part
 way through arrives as an "error.json" entry under a 200 rather than an HTTP
 error - unpacking that alongside the rest would leave a bundle that looked
@@ -29,6 +33,7 @@ import urllib.parse
 import urllib.request
 
 ERROR_KEY = 'error.json'
+SUBSCRIPTIONS = 'subscriptions.json'
 PROG = os.path.basename(sys.argv[0]) or 'fetch-tutorial.py'
 
 
@@ -134,6 +139,79 @@ def safe_relative_path(key):
     return os.path.join(*parts)
 
 
+def subscription_entry(dump):
+    """
+    The @@quizdb-subscriptions node for the tutorial in this dump: its title,
+    and a {uri, title} child per lecture in the order the dump lists them.
+
+    NB: No 'uri' on the tutorial node. quizlib's lectureUrisFromSubscription()
+    returns early for any node with one, so a tutorial carrying a uri would be
+    taken for a lecture and its children never walked. 'id' is ignored by the
+    client (and is what insertTutorial() sets), so identity goes there.
+    """
+    tutorials = [k for k, v in dump.items()
+                 if isinstance(v, dict) and isinstance(v.get('lectures'), list)]
+    if len(tutorials) != 1:
+        die('expected one tutorial in the dump, found %d' % len(tutorials))
+    key = tutorials[0]
+    tutorial = dump[key]
+
+    # Every URI is base + its own key, so the tutorial tells us the base and
+    # we can look its lectures back up
+    uri = tutorial.get('uri', '')
+    if not uri.endswith(key):
+        die('tutorial %s has uri %r, which does not end with its own name' % (key, uri))
+    base = uri[:-len(key)]
+
+    children = []
+    for lecture_uri in tutorial['lectures']:
+        if not lecture_uri.startswith(base):
+            die('lecture %r is not under %s' % (lecture_uri, base))
+        lecture = dump.get(lecture_uri[len(base):])
+        if lecture is None:
+            die('lecture %r is missing from the dump' % lecture_uri)
+        children.append(dict(uri=lecture_uri, title=lecture.get('title', '')))
+
+    return dict(id=key, title=tutorial.get('title', ''), children=children)
+
+
+def write_subscriptions(entry, outdir):
+    """
+    Add this tutorial to subscriptions.json, replacing its own entry if it is
+    already listed and leaving the other tutorials alone, so a bundle built up
+    a tutorial at a time ends with all of them listed.
+    """
+    path = os.path.join(outdir, SUBSCRIPTIONS)
+    subscriptions = dict(children=[])
+
+    if os.path.exists(path):
+        try:
+            with open(path, encoding='utf-8') as f:
+                subscriptions = json.load(f)
+        except (ValueError, EnvironmentError) as e:
+            die('could not read the existing %s\n  %s' % (path, e))
+        if not isinstance(subscriptions, dict) or \
+                not isinstance(subscriptions.get('children'), list):
+            die('%s is not a subscriptions structure; move it aside' % path)
+
+    # Replaced where it already appears, appended otherwise, so the order
+    # tutorials were fetched in is the order they're offered in and
+    # re-fetching one doesn't shuffle it to the end
+    children = subscriptions['children']
+    for i, child in enumerate(children):
+        if isinstance(child, dict) and child.get('id') == entry['id']:
+            children[i] = entry
+            break
+    else:
+        children.append(entry)
+
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(subscriptions, f, ensure_ascii=False, sort_keys=True)
+        f.write('\n')
+
+    return len(children)
+
+
 def write_dump(dump, outdir, indent=None):
     """
     Write every entry beneath outdir, adding to whatever is already there.
@@ -192,14 +270,22 @@ def main(argv=None):
     if unsafe:
         die('refusing to write entries named: %s' % ', '.join(repr(k) for k in unsafe[:5]))
 
+    # Built before anything is written, so a dump we can't summarise doesn't
+    # get half-unpacked first
+    entry = subscription_entry(dump)
+
     outdir = write_dump(dump, args.output, args.indent)
+    listed = write_subscriptions(entry, outdir)
 
     if not args.quiet:
         tutorials = sum(1 for k in dump if k.startswith('tutorials/'))
         questions = sum(1 for k in dump if k.startswith('questions/'))
-        sys.stderr.write('%s: wrote %d files to %s (%d tutorial/lecture, %d question)\n' % (
-            PROG, len(dump), outdir, tutorials, questions,
-        ))
+        sys.stderr.write(
+            '%s: wrote %d files to %s (%d tutorial/lecture, %d question)\n'
+            '%s: %s lists %d tutorial(s); added %r with %d lecture(s)\n' % (
+                PROG, len(dump), outdir, tutorials, questions,
+                PROG, SUBSCRIPTIONS, listed, entry['title'], len(entry['children']),
+            ))
     return 0
 
 
