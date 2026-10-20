@@ -19,14 +19,24 @@ AD_UNIT_ID_ANDROID="${AD_UNIT_ID_ANDROID:-ca-app-pub-3940256099942544/1033173712
 # talked to a server. Space-separated portal paths, e.g.
 #   SEED_TUTORIALS="math/math099.1 math/math100.1" bin/build.sh
 # Empty (the default) builds without any, as before.
+SEED_ROOT="${SEED_ROOT:-$PORTAL_ROOT}"
 SEED_TUTORIALS="${SEED_TUTORIALS:-}"
-# Where under www/ the dumps are unpacked, and so the URI prefix the app will
-# find them at. APP_ROOT must match config.xml's Hostname preference (served
-# over https unless AndroidInsecureFileModeEnabled is set).
+# Where under www/ the dumps are unpacked, and so the root-relative URI the
+# app will find them at: every URI in the dump is resolved against wherever
+# the app itself is served from, so there's no hostname to keep in step here.
 SEED_DIR="${SEED_DIR:-content}"
-APP_ROOT="${APP_ROOT:-https://tutorweb-quiz-app/}"
 # Set for a test server with a self-signed certificate
 SEED_INSECURE="${SEED_INSECURE:-}"
+
+# The subscription table fetch-tutorial.py maintains alongside the dumps. The
+# app seeds itself from this on launch instead of asking the server for one,
+# so it needs neither network nor login to offer the bundled tutorials. Unset
+# without seed content, which leaves the app asking the server as before.
+if [ -n "$SEED_TUTORIALS" ]; then
+    SEED_SUBSCRIPTIONS="/${SEED_DIR}/subscriptions.json"
+else
+    SEED_SUBSCRIPTIONS=""
+fi
 
 [ -d "$QUIZ_CHECKOUT" ] || git clone https://github.com/tutor-web/tutorweb.quiz "$QUIZ_CHECKOUT"
 make -C "$QUIZ_CHECKOUT"
@@ -40,7 +50,7 @@ rm -f "$WWW/tw.js.map.js"  # debug build artifact, not needed to ship
 # Replace TWEXTRA with our configuration
 for f in "${QUIZ_RES}/coin.html" "${QUIZ_RES}/quiz.html" "${QUIZ_RES}/start.html"; do
   sed "s|<!-- TWEXTRA -->|\\
-  <script>twConfig = { portalRoot: '${PORTAL_ROOT}', adUnitIdAndroid: '${AD_UNIT_ID_ANDROID}' };</script>\\
+  <script>twConfig = { portalRoot: '${PORTAL_ROOT}', adUnitIdAndroid: '${AD_UNIT_ID_ANDROID}', seedSubscriptions: '${SEED_SUBSCRIPTIONS}' };</script>\\
   <script src='cordova.js'></script>\\
   <script src='twads.js'></script>\\
   |" "$f" > "${WWW}/$(basename "$f")"
@@ -66,12 +76,12 @@ if [ -n "$SEED_TUTORIALS" ]; then
         # NB: fetch-tutorial.py exits non-zero on a partial dump, and set -e
         # means that fails the build rather than shipping half a tutorial
         "$HERE/bin/fetch-tutorial.py" \
-            "${PORTAL_ROOT%/}/${tutorial}/@@quizdb-tutorial-dump" \
+            "${SEED_ROOT%/}/${tutorial}/@@quizdb-tutorial-dump" \
             --output "$WWW/$SEED_DIR" \
-            --base "${APP_ROOT%/}/${SEED_DIR}/" \
+            --base "/${SEED_DIR}/" \
             ${SEED_INSECURE:+--insecure}
     done
-    echo "Seeded $SEED_TUTORIALS -> $WWW/$SEED_DIR (base: ${APP_ROOT%/}/${SEED_DIR}/)"
+    echo "Seeded $SEED_TUTORIALS -> $WWW/$SEED_DIR (base: /${SEED_DIR}/)"
 fi
 
 # Allow hosting via. nginx too

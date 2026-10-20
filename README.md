@@ -40,6 +40,15 @@ The `bin/build.sh` generates a debug apk ready to install on a test device.
 
 If not already present, a copy of the `tutorweb.quiz` repo will be checked out.
 
+### Bundling seed content
+
+`SEED_TUTORIALS` names tutorials to bundle into the app, so it has drills to
+offer before it has talked to a server:
+
+```sh
+SEED_TUTORIALS="math/math099.1 math/math100.1" bin/build.sh
+```
+
 ## Running on a real android device
 
 ### Access within an incus container
