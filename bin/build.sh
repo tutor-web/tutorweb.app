@@ -14,6 +14,8 @@ WWW="$HERE/www"
 
 PORTAL_ROOT="${PORTAL_ROOT:-https://tutor-web.net/}"
 AD_UNIT_ID_ANDROID="${AD_UNIT_ID_ANDROID:-ca-app-pub-3940256099942544/1033173712}"
+# The endpoint used to sync lectures
+SYNC_URI="${SYNC_URI:-/sync}"
 
 # Tutorials to bundle as seed content, so the app has drills before it has
 # talked to a server. Space-separated portal paths, e.g.
@@ -21,10 +23,6 @@ AD_UNIT_ID_ANDROID="${AD_UNIT_ID_ANDROID:-ca-app-pub-3940256099942544/1033173712
 # Empty (the default) builds without any, as before.
 SEED_ROOT="${SEED_ROOT:-$PORTAL_ROOT}"
 SEED_TUTORIALS="${SEED_TUTORIALS:-}"
-# Where under www/ the dumps are unpacked, and so the root-relative URI the
-# app will find them at: every URI in the dump is resolved against wherever
-# the app itself is served from, so there's no hostname to keep in step here.
-SEED_DIR="${SEED_DIR:-content}"
 # Set for a test server with a self-signed certificate
 SEED_INSECURE="${SEED_INSECURE:-}"
 
@@ -33,7 +31,7 @@ SEED_INSECURE="${SEED_INSECURE:-}"
 # so it needs neither network nor login to offer the bundled tutorials. Unset
 # without seed content, which leaves the app asking the server as before.
 if [ -n "$SEED_TUTORIALS" ]; then
-    SEED_SUBSCRIPTIONS="/${SEED_DIR}/subscriptions.json"
+    SEED_SUBSCRIPTIONS="/subscriptions.json"
 else
     SEED_SUBSCRIPTIONS=""
 fi
@@ -50,7 +48,7 @@ rm -f "$WWW/tw.js.map.js"  # debug build artifact, not needed to ship
 # Replace TWEXTRA with our configuration
 for f in "${QUIZ_RES}/coin.html" "${QUIZ_RES}/quiz.html" "${QUIZ_RES}/start.html"; do
   sed "s|<!-- TWEXTRA -->|\\
-  <script>twConfig = { portalRoot: '${PORTAL_ROOT}', adUnitIdAndroid: '${AD_UNIT_ID_ANDROID}', seedSubscriptions: '${SEED_SUBSCRIPTIONS}' };</script>\\
+  <script>twConfig = { portalRoot: '${PORTAL_ROOT}', adUnitIdAndroid: '${AD_UNIT_ID_ANDROID}', seedSubscriptions: '${SEED_SUBSCRIPTIONS}', syncUri: '${SYNC_URI}' };</script>\\
   <script src='cordova.js'></script>\\
   <script src='twads.js'></script>\\
   |" "$f" > "${WWW}/$(basename "$f")"
@@ -77,17 +75,17 @@ if [ -n "$SEED_TUTORIALS" ]; then
         # means that fails the build rather than shipping half a tutorial
         "$HERE/bin/fetch-tutorial.py" \
             "${SEED_ROOT%/}/${tutorial}/@@quizdb-tutorial-dump" \
-            --output "$WWW/$SEED_DIR" \
-            --base "/${SEED_DIR}/" \
+            --output "$WWW" \
+            --base "/" \
             ${SEED_INSECURE:+--insecure}
     done
-    echo "Seeded $SEED_TUTORIALS -> $WWW/$SEED_DIR (base: /${SEED_DIR}/)"
+    echo "Seeded $SEED_TUTORIALS -> $WWW (base: /)"
 fi
 
 # Allow hosting via. nginx too
 chmod a+rX www/
 
-echo "Synced $QUIZ_RES -> $WWW (portalRoot: $PORTAL_ROOT)"
+echo "Synced $QUIZ_RES -> $WWW (portalRoot: $PORTAL_ROOT, syncUri: ${SYNC_URI:-<lecture>})"
 
 [ -d "$HERE/platforms/android" ] || npx cordova platform add android
 
