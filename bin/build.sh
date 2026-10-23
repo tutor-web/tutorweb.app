@@ -25,6 +25,8 @@ SEED_ROOT="${SEED_ROOT:-$PORTAL_ROOT}"
 SEED_TUTORIALS="${SEED_TUTORIALS:-}"
 # Set for a test server with a self-signed certificate
 SEED_INSECURE="${SEED_INSECURE:-}"
+# Shared secret @@quizdb-tutorial-dump checks
+export TW_DUMP_KEY="${TW_DUMP_KEY:-}"
 
 # The subscription table fetch-tutorial.py maintains alongside the dumps. The
 # app seeds itself from this on launch instead of asking the server for one,

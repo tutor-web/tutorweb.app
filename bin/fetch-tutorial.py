@@ -20,7 +20,8 @@ way through arrives as an "error.json" entry under a 200 rather than an HTTP
 error - unpacking that alongside the rest would leave a bundle that looked
 complete but wasn't. The response is checked before any of it is written.
 
-  bin/fetch-tutorial.py https://example.com/math/math099.1/@@quizdb-tutorial-dump \
+  TW_DUMP_KEY=... bin/fetch-tutorial.py \
+      https://example.com/math/math099.1/@@quizdb-tutorial-dump \
       --output www/seed --base https://tutorweb-quiz-app/
 """
 import argparse
@@ -35,6 +36,12 @@ import urllib.request
 ERROR_KEY = 'error.json'
 SUBSCRIPTIONS = 'subscriptions.json'
 PROG = os.path.basename(sys.argv[0]) or 'fetch-tutorial.py'
+# The shared secret the endpoint checks, and where we pick it up from
+KEY_HEADER = 'X-Tutorweb-Dump-Key'
+KEY_ENV = 'TW_DUMP_KEY'
+# Hosts we'll send the key to over plain http, there being no network to
+# overhear it on
+LOOPBACK_HOSTS = ('localhost', '127.0.0.1', '::1')
 
 
 def die(msg):
@@ -42,11 +49,40 @@ def die(msg):
     raise SystemExit(1)
 
 
-def fetch(url, base=None, insecure=False, timeout=120):
+def dump_key():
+    """
+    The shared secret for the endpoint, or die for want of it.
+
+    Required, rather than fetched without and left to come back 403: the
+    endpoint has nothing to offer a request that hasn't got it.
+    """
+    key = os.environ.get(KEY_ENV, '').strip()
+    if not key:
+        die("%s must be set to the server's quizdb-dump-key\n"
+            "  (what @@quizdb-tutorial-dump checks; see tutorweb.buildout's\n"
+            "  buildout.cfg, or the TW_DUMP_KEY secret in CI)" % KEY_ENV)
+    return key
+
+
+def fetch(url, base=None, insecure=False, timeout=120, key=None):
     """Return the parsed dump, or die trying"""
     if base:
         sep = '&' if urllib.parse.urlparse(url).query else '?'
         url = url + sep + urllib.parse.urlencode(dict(base=base))
+
+    parsed_url = urllib.parse.urlparse(url)
+    headers = {}
+    if key:
+        # Sending the key to an http:// URL would put it on the wire in the
+        # clear, and a server that redirects to https has already had it by
+        # then. --insecure is no help here: it's about not trusting the
+        # certificate, not about not having one.
+        if parsed_url.scheme != 'https' and parsed_url.hostname not in LOOPBACK_HOSTS:
+            die('refusing to send %s to %s\n'
+                '  Use an https:// URL, so the key isn\'t sent in the clear.' % (
+                    KEY_ENV, url,
+                ))
+        headers[KEY_HEADER] = key
 
     context = None
     if insecure:
@@ -54,8 +90,9 @@ def fetch(url, base=None, insecure=False, timeout=120):
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
 
+    request = urllib.request.Request(url, headers=headers)
     try:
-        with urllib.request.urlopen(url, timeout=timeout, context=context) as response:
+        with urllib.request.urlopen(request, timeout=timeout, context=context) as response:
             content_type = response.headers.get('Content-Type', '')
             body = response.read()
     except urllib.error.HTTPError as e:
@@ -63,17 +100,24 @@ def fetch(url, base=None, insecure=False, timeout=120):
         detail = e.read().decode('utf-8', 'replace')
         try:
             parsed = json.loads(detail)
+            # A failure before the dump started streaming is reported as a
+            # lone ERROR_KEY member, rather than the flat object the
+            # non-streaming views give
+            if isinstance(parsed.get(ERROR_KEY), dict):
+                parsed = parsed[ERROR_KEY]
             detail = '%s: %s' % (
                 parsed.get('error', e.reason),
                 parsed.get('message', parsed.get('location', '')),
             )
-        except ValueError:
+        except (ValueError, AttributeError):
             # Not a JSON error body. A Plone HTML error page is no use here,
             # so go with the status and reason; anything else might be.
             if 'html' in e.headers.get('Content-Type', ''):
                 detail = e.reason
             else:
                 detail = detail.strip()[:200] or e.reason
+        if e.code in (401, 403):
+            detail += '\n  (%s must match the server\'s quizdb-dump-key)' % KEY_ENV
         die('HTTP %s from %s\n  %s' % (e.code, url, detail))
     except urllib.error.URLError as e:
         hint = ''
@@ -263,7 +307,7 @@ def main(argv=None):
     parser.add_argument('-q', '--quiet', action='store_true')
     args = parser.parse_args(argv)
 
-    dump = fetch(args.url, args.base, args.insecure, args.timeout)
+    dump = fetch(args.url, args.base, args.insecure, args.timeout, dump_key())
     report_server_error(dump)
 
     unsafe = sorted(k for k in dump if safe_relative_path(k) is None)

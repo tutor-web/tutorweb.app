@@ -10,6 +10,9 @@
 #     the keystore (the value given to `keytool -genkeypair` for
 #     -storepass/-keypass, or entered interactively if prompted).
 #
+#   TW_DUMP_KEY — shared secret for the server's @@quizdb-tutorial-dump, i.e.
+#     quizdb-dump-key in buildout.cfg.
+#
 name: Build Android app
 
 on:
@@ -74,6 +77,8 @@ jobs:
       - name: Build debug APK
         if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
         run: bin/build.sh
+        env:
+          TW_DUMP_KEY: ${{ secrets.TW_DUMP_KEY }}
 
       - name: Build signed release bundle
         # Also produces the debug APK along the way (see bin/build.sh).
@@ -81,6 +86,7 @@ jobs:
         run: bin/build.sh release
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          TW_DUMP_KEY: ${{ secrets.TW_DUMP_KEY }}
 
       - name: Remove keystore
         if: always()
