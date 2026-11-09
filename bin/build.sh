@@ -92,7 +92,32 @@ echo "Synced $QUIZ_RES -> $WWW (portalRoot: $PORTAL_ROOT, syncUri: ${SYNC_URI:-<
 
 [ -d "$HERE/platforms/android" ] || npx cordova platform add android
 
-npx cordova build android
+# Cordova only accepts signing credentials via a buildConfig JSON file,
+# write it to a temporary directory that gets cleaned up afterwards
+BUILD_DIR="$(mktemp -d)"
+trap 'rm -rf "$BUILD_DIR"' EXIT
+
+# Use a shared debug keystore in CI builds
+DEBUG_KEYSTORE="${DEBUG_KEYSTORE:-$HERE/debug-keystore.jks}"
+if [ -f "$DEBUG_KEYSTORE" ]; then
+    cat > "$BUILD_DIR/debug.json" <<JSON
+{
+  "android": {
+    "debug": {
+      "keystore": "$DEBUG_KEYSTORE",
+      "storePassword": "android",
+      "alias": "androiddebugkey",
+      "password": "android",
+      "keystoreType": "jks"
+    }
+  }
+}
+JSON
+    npx cordova build android --buildConfig="$BUILD_DIR/debug.json"
+else
+    echo "No $DEBUG_KEYSTORE; Gradle will sign with a per-machine debug key" >&2
+    npx cordova build android
+fi
 echo "Built $HERE/platforms/android/app/build/outputs/apk/debug/app-debug.apk"
 
 if [ "$1" = "release" ]; then
@@ -101,11 +126,7 @@ if [ "$1" = "release" ]; then
   : "${ANDROID_KEY_ALIAS-smileytutor}"
   : "${ANDROID_KEY_PASSWORD-${ANDROID_KEYSTORE_PASSWORD}}"
 
-  # Cordova only accepts signing credentials via a buildConfig JSON file, so
-  # write one to a private tempfile rather than ever putting passwords in
-  # the repo. Cleaned up on exit either way.
-  BUILD_JSON="$(mktemp)"
-  trap 'rm -f "$BUILD_JSON"' EXIT
+  BUILD_JSON="$BUILD_DIR/release.json"
   cat > "$BUILD_JSON" <<JSON
 {
   "android": {
@@ -121,4 +142,18 @@ JSON
 
   npx cordova build android --release --buildConfig="$BUILD_JSON" -- --packageType=bundle
   echo "Built $HERE/platforms/android/app/build/outputs/bundle/release/app-release.aab"
+
+  # And an APK signed with the same key. The bundle is a Play upload format
+  # that cannot be installed on a device, so without this a tagged release
+  # has nothing anyone can actually run.
+  npx cordova build android --release --buildConfig="$BUILD_JSON" -- --packageType=apk
+  RELEASE_APK="$HERE/platforms/android/app/build/outputs/apk/release/app-release.apk"
+  # Gradle emits app-release-unsigned.apk instead when the signing config did
+  # not take, which is worth failing on rather than shipping unsigned
+  [ -f "$RELEASE_APK" ] || {
+      echo "No signed APK at $RELEASE_APK - did the signing config apply?" >&2
+      ls -l "$(dirname "$RELEASE_APK")" >&2 || true
+      exit 1
+  }
+  echo "Built $RELEASE_APK"
 fi

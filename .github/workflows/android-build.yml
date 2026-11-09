@@ -1,9 +1,13 @@
-# Secrets live in the "main" GitHub environment, which the build job below
-# declares; without that declaration they would expand to empty strings.
-# Its deployment branch policy must allow main and the v* tags, or runs sit
-# waiting for approval.
+# Expected *repository* secrets:
+#   DEBUG_KEYSTORE_BASE64 — base64-encoded shared debug keystore, alias
+#     androiddebugkey, store and key password "android".
+#       keytool -genkeypair -v -keystore debug-keystore.jks -storetype JKS \
+#         -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10950 \
+#         -storepass android -keypass android \
+#         -dname "CN=Android Debug,O=Android,C=US"
+#       base64 -w0 debug-keystore.jks
 #
-# Required secrets for the signed release build:
+# Expected *environment* secrets for the signed release build:
 #
 #   ANDROID_KEYSTORE_BASE64 — base64-encoded signing keystore.
 #     Generate the keystore first (see README.md "Building a signed
@@ -40,6 +44,9 @@ jobs:
     # Pull requests are handled by pr-build below, which needs no secrets
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    # Needed to publish the APK as a release asset
+    permissions:
+      contents: write
     # Holds ANDROID_KEYSTORE_*/TW_DUMP_KEY as environment secrets
     environment: main
     steps:
@@ -77,6 +84,35 @@ jobs:
 
       - run: npm ci
 
+      - name: Restore shared debug keystore
+        # A repository rather than environment secret, so a pull request from
+        # a branch of this repo gets it too. A fork pull request gets nothing
+        # - GitHub withholds secrets from those - and bin/build.sh then falls
+        # back to a per-machine key: the APK still builds, it just will not
+        # install over anyone else's.
+        env:
+          DEBUG_KEYSTORE_BASE64: ${{ secrets.DEBUG_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "${DEBUG_KEYSTORE_BASE64}" ]; then
+              base64 -d <<< "${DEBUG_KEYSTORE_BASE64}" > debug-keystore.jks
+          else
+              echo "No DEBUG_KEYSTORE_BASE64 set; debug build will use a per-machine key" >&2
+          fi
+
+      - name: Stamp the version into config.xml
+        # versionCode: The number Android and Play order updates by, should increment
+        # versionName: The readable half, used for tagged versions
+        run: |
+          case "${GITHUB_REF}" in
+              refs/tags/v*) VERSION_NAME="${GITHUB_REF_NAME#v}" ;;
+              *)            VERSION_NAME="main-$(git rev-parse --short HEAD)" ;;
+          esac
+          # Confined to the <widget> line, so the XML declaration's own
+          # version attribute on line 1 is left alone
+          sed -i "/<widget /s|version=\"[^\"]*\"|version=\"${VERSION_NAME}\"|" config.xml
+          sed -i "s|\(name=\"android-versionCode\" value=\)\"[0-9]*\"|\1\"${GITHUB_RUN_NUMBER}\"|" config.xml
+          grep -e '<widget ' -e android-versionCode config.xml
+
       - name: Restore signing keystore
         if: startsWith(github.ref, 'refs/tags/v')
         run: base64 -d <<< "${ANDROID_KEYSTORE_BASE64}" > upload-keystore.jks
@@ -99,7 +135,36 @@ jobs:
 
       - name: Remove keystore
         if: always()
-        run: rm -f upload-keystore.jks
+        run: rm -f upload-keystore.jks debug-keystore.jks
+
+      - name: Publish the rolling main build
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp platforms/android/app/build/outputs/apk/debug/app-debug.apk tutorweb-app-main.apk
+          # Recreated rather than edited, so the main-latest tag keeps up with
+          # main instead of staying pinned to whenever it was first made
+          gh release delete main-latest --cleanup-tag --yes || true
+          gh release create main-latest tutorweb-app-main.apk \
+              --target "${GITHUB_SHA}" \
+              --prerelease \
+              --title "Latest main build" \
+              --notes "Debug build of ${GITHUB_SHA}, versionCode ${GITHUB_RUN_NUMBER}. Signed with the shared debug key, so it installs over an earlier build of the same app. Replaced on every push to main."
+
+      - name: Attach builds to the tagged release for Play store
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp platforms/android/app/build/outputs/apk/release/app-release.apk \
+              "tutorweb-app-${GITHUB_REF_NAME}.apk"
+          gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1 ||
+              gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" --generate-notes
+          gh release upload "${GITHUB_REF_NAME}" \
+              "tutorweb-app-${GITHUB_REF_NAME}.apk" \
+              platforms/android/app/build/outputs/bundle/release/app-release.aab \
+              --clobber
 
       - uses: actions/upload-artifact@v4
         with:
@@ -110,12 +175,11 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           name: app-release
-          path: platforms/android/app/build/outputs/bundle/release/app-release.aab
+          path: |
+            platforms/android/app/build/outputs/bundle/release/app-release.aab
+            platforms/android/app/build/outputs/apk/release/app-release.apk
 
-  # A plain debug build, to catch changes that break the Android build before
-  # they reach main. Deliberately has no environment and no secrets: fork pull
-  # requests would not be given them anyway, and bin/build.sh only reads
-  # TW_DUMP_KEY when SEED_TUTORIALS is set, which this does not set.
+  # Plain build to catch compile-time errors
   pr-build:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -154,8 +218,41 @@ jobs:
 
       - run: npm ci
 
+      - name: Restore shared debug keystore
+        # A repository rather than environment secret, so a pull request from
+        # a branch of this repo gets it too. A fork pull request gets nothing
+        # - GitHub withholds secrets from those - and bin/build.sh then falls
+        # back to a per-machine key: the APK still builds, it just will not
+        # install over anyone else's.
+        env:
+          DEBUG_KEYSTORE_BASE64: ${{ secrets.DEBUG_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "${DEBUG_KEYSTORE_BASE64}" ]; then
+              base64 -d <<< "${DEBUG_KEYSTORE_BASE64}" > debug-keystore.jks
+          else
+              echo "No DEBUG_KEYSTORE_BASE64 set; debug build will use a per-machine key" >&2
+          fi
+
+      - name: Stamp the version into config.xml
+        # Same scheme as the build job, so a PR APK installs over a main build
+        # and reports which PR it came from. run_number is shared across the
+        # whole workflow, so it stays ahead of whatever main last built. The
+        # head sha rather than HEAD, which here is the ephemeral merge commit.
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          VERSION_NAME="pr${PR_NUMBER}-${PR_HEAD_SHA:0:7}"
+          sed -i "/<widget /s|version=\"[^\"]*\"|version=\"${VERSION_NAME}\"|" config.xml
+          sed -i "s|\(name=\"android-versionCode\" value=\)\"[0-9]*\"|\1\"${GITHUB_RUN_NUMBER}\"|" config.xml
+          grep -e '<widget ' -e android-versionCode config.xml
+
       - name: Build debug APK
         run: bin/build.sh
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f debug-keystore.jks
 
       - uses: actions/upload-artifact@v4
         with:

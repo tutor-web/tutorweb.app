@@ -3,6 +3,12 @@
 Apache Cordova project that wraps the [tutorweb.quiz](https://github.com/tutor-web/tutorweb.quiz)
 client-side app as an Android application.
 
+## Installing the latest build
+
+The latest development builds are installable via. the following link:
+
+<https://github.com/tutor-web/tutorweb.app/releases/download/main-latest/tutorweb-app-main.apk>
+
 ## Installing build tools (Debian 13 "trixie")
 
 None of this is installed on a fresh host. `/opt/android-sdk` is used as the
@@ -40,6 +46,10 @@ The `bin/build.sh` generates a debug apk ready to install on a test device.
 
 If not already present, a copy of the `tutorweb.quiz` repo will be checked out.
 
+Debug builds are signed with `debug-keystore.jks` if it is present in the
+checkout. Sharing one key means APKs from CI and from any developer install
+over each other, instead of being rejected as a signature mismatch.
+
 ### Bundling seed content
 
 `SEED_TUTORIALS` names tutorials to bundle into the app, so it has drills to
@@ -67,17 +77,7 @@ adb install platforms/android/app/build/outputs/apk/debug/app-debug.apk
 adb logcat -t0 -s chromium:* CordovaLog:*
 ```
 
-## Building a signed release bundle
+## Signed release bundles
 
-If not already present, a keystore should be generated with:
-
-```sh
-keytool -genkeypair -v -keystore upload-keystore.jks \
-  -alias smileytutor -keyalg RSA -keysize 2048 -validity 9125
-``
-
-Then `app-release.aab` can be generated with:
-
-```sh
-ANDROID_KEYSTORE_PASSWORD=... bin/build.sh release
-```
+A `v*` tagged version produce fully-signed `.aab` files that should go to the
+Play store.
