@@ -12,7 +12,7 @@ QUIZ_CHECKOUT="$HERE/tutorweb.quiz"
 QUIZ_RES="$QUIZ_CHECKOUT/tutorweb/quiz/resources"
 WWW="$HERE/www"
 
-PORTAL_ROOT="${PORTAL_ROOT:-https://tutor-web.net/}"
+BACKEND_ROOT="${BACKEND_ROOT:-https://app-backend.tutor-web.net/}"
 AD_UNIT_ID_ANDROID="${AD_UNIT_ID_ANDROID:-ca-app-pub-3940256099942544/1033173712}"
 # The endpoint used to sync lectures
 SYNC_URI="${SYNC_URI:-/sync}"
@@ -22,7 +22,7 @@ TW_QUIZ_BRANCH="${TW_QUIZ_BRANCH:-anonymous-app}"
 # talked to a server. Space-separated portal paths, e.g.
 #   SEED_TUTORIALS="math/math099.1 math/math100.1" bin/build.sh
 # Empty (the default) builds without any, as before.
-SEED_ROOT="${SEED_ROOT:-$PORTAL_ROOT}"
+SEED_ROOT="${SEED_ROOT:-https://tutor-web.net/}"
 SEED_TUTORIALS="${SEED_TUTORIALS:-}"
 # Set for a test server with a self-signed certificate
 SEED_INSECURE="${SEED_INSECURE:-}"
@@ -51,7 +51,7 @@ rm -f "$WWW/tw.js.map.js"  # debug build artifact, not needed to ship
 # Replace TWEXTRA with our configuration
 for f in "${QUIZ_RES}/coin.html" "${QUIZ_RES}/quiz.html" "${QUIZ_RES}/start.html"; do
   sed "s|<!-- TWEXTRA -->|\\
-  <script>twConfig = { portalRoot: '${PORTAL_ROOT}', adUnitIdAndroid: '${AD_UNIT_ID_ANDROID}', seedSubscriptions: '${SEED_SUBSCRIPTIONS}', syncUri: '${SYNC_URI}' };</script>\\
+  <script>twConfig = { portalRoot: '${BACKEND_ROOT}', adUnitIdAndroid: '${AD_UNIT_ID_ANDROID}', seedSubscriptions: '${SEED_SUBSCRIPTIONS}', syncUri: '${SYNC_URI}' };</script>\\
   <script src='cordova.js'></script>\\
   <script src='twads.js'></script>\\
   |" "$f" > "${WWW}/$(basename "$f")"
@@ -88,7 +88,7 @@ fi
 # Allow hosting via. nginx too
 chmod a+rX www/
 
-echo "Synced $QUIZ_RES -> $WWW (portalRoot: $PORTAL_ROOT, syncUri: ${SYNC_URI:-<lecture>})"
+echo "Synced $QUIZ_RES -> $WWW (portalRoot: $BACKEND_ROOT, syncUri: ${SYNC_URI:-<lecture>})"
 
 [ -d "$HERE/platforms/android" ] || npx cordova platform add android
 

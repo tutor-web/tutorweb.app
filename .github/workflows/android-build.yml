@@ -22,6 +22,15 @@
 #   TW_DUMP_KEY — shared secret for the server's @@quizdb-tutorial-dump, i.e.
 #     quizdb-dump-key in buildout.cfg.
 #
+# Optional *repository* variables, passed through to bin/build.sh
+#
+#   BACKEND_ROOT — the backend the app talks to (NB: not Plone)
+#
+#   SEED_ROOT — where seed content is fetched from, defaults to tutor-web.net
+#
+#   SEED_TUTORIALS — space-separated portal paths to bundle as seed content,
+#     e.g. "math/math099.1 math/math100.1".
+#
 name: Build Android app
 
 on:
@@ -120,6 +129,9 @@ jobs:
         run: bin/build.sh
         env:
           TW_DUMP_KEY: ${{ secrets.TW_DUMP_KEY }}
+          BACKEND_ROOT: ${{ vars.BACKEND_ROOT }}
+          SEED_ROOT: ${{ vars.SEED_ROOT }}
+          SEED_TUTORIALS: ${{ vars.SEED_TUTORIALS }}
 
       - name: Build signed release bundle
         # Also produces the debug APK along the way (see bin/build.sh).
@@ -128,6 +140,9 @@ jobs:
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           TW_DUMP_KEY: ${{ secrets.TW_DUMP_KEY }}
+          BACKEND_ROOT: ${{ vars.BACKEND_ROOT }}
+          SEED_ROOT: ${{ vars.SEED_ROOT }}
+          SEED_TUTORIALS: ${{ vars.SEED_TUTORIALS }}
 
       - name: Remove keystore
         if: always()
@@ -240,7 +255,13 @@ jobs:
         run: bin/stamp-version.sh "pr${PR_NUMBER}-${PR_HEAD_SHA:0:7}" "${GITHUB_RUN_NUMBER}"
 
       - name: Build debug APK
+        # SEED_TUTORIALS is deliberately not passed: fetching seed content
+        # needs TW_DUMP_KEY, and this job has no environment secrets, so
+        # bin/build.sh would fail rather than quietly ship an unseeded app.
         run: bin/build.sh
+        env:
+          BACKEND_ROOT: ${{ vars.BACKEND_ROOT }}
+          SEED_ROOT: ${{ vars.SEED_ROOT }}
 
       - name: Remove keystore
         if: always()
