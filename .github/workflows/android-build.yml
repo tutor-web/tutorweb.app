@@ -1,4 +1,9 @@
-# Required repository secrets for the signed release build:
+# Secrets live in the "main" GitHub environment, which the build job below
+# declares; without that declaration they would expand to empty strings.
+# Its deployment branch policy must allow main and the v* tags, or runs sit
+# waiting for approval.
+#
+# Required secrets for the signed release build:
 #
 #   ANDROID_KEYSTORE_BASE64 — base64-encoded signing keystore.
 #     Generate the keystore first (see README.md "Building a signed
@@ -32,7 +37,11 @@ env:
 
 jobs:
   build:
+    # Pull requests are handled by pr-build below, which needs no secrets
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    # Holds ANDROID_KEYSTORE_*/TW_DUMP_KEY as environment secrets
+    environment: main
     steps:
       - uses: actions/checkout@v4
 
@@ -102,3 +111,53 @@ jobs:
         with:
           name: app-release
           path: platforms/android/app/build/outputs/bundle/release/app-release.aab
+
+  # A plain debug build, to catch changes that break the Android build before
+  # they reach main. Deliberately has no environment and no secrets: fork pull
+  # requests would not be given them anyway, and bin/build.sh only reads
+  # TW_DUMP_KEY when SEED_TUTORIALS is set, which this does not set.
+  pr-build:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools emulator'
+
+      - name: Cache Android SDK platform & build-tools
+        id: android-sdk-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.ANDROID_HOME }}/platforms/android-${{ env.ANDROID_PLATFORM_VERSION }}
+            ${{ env.ANDROID_HOME }}/build-tools/${{ env.ANDROID_BUILD_TOOLS_VERSION }}
+          key: android-sdk-platform${{ env.ANDROID_PLATFORM_VERSION }}-buildtools${{ env.ANDROID_BUILD_TOOLS_VERSION }}
+
+      - name: Install Android SDK platform & build-tools
+        # Skipped on a cache hit — this is the step that would otherwise
+        # hit Google's servers on every run.
+        if: steps.android-sdk-cache.outputs.cache-hit != 'true'
+        run: sdkmanager --install "platforms;android-${ANDROID_PLATFORM_VERSION}" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
+
+      - run: npm ci
+
+      - name: Build debug APK
+        run: bin/build.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
