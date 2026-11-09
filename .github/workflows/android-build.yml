@@ -107,11 +107,7 @@ jobs:
               refs/tags/v*) VERSION_NAME="${GITHUB_REF_NAME#v}" ;;
               *)            VERSION_NAME="main-$(git rev-parse --short HEAD)" ;;
           esac
-          # Confined to the <widget> line, so the XML declaration's own
-          # version attribute on line 1 is left alone
-          sed -i "/<widget /s|version=\"[^\"]*\"|version=\"${VERSION_NAME}\"|" config.xml
-          sed -i "s|\(name=\"android-versionCode\" value=\)\"[0-9]*\"|\1\"${GITHUB_RUN_NUMBER}\"|" config.xml
-          grep -e '<widget ' -e android-versionCode config.xml
+          bin/stamp-version.sh "${VERSION_NAME}" "${GITHUB_RUN_NUMBER}"
 
       - name: Restore signing keystore
         if: startsWith(github.ref, 'refs/tags/v')
@@ -241,11 +237,7 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          VERSION_NAME="pr${PR_NUMBER}-${PR_HEAD_SHA:0:7}"
-          sed -i "/<widget /s|version=\"[^\"]*\"|version=\"${VERSION_NAME}\"|" config.xml
-          sed -i "s|\(name=\"android-versionCode\" value=\)\"[0-9]*\"|\1\"${GITHUB_RUN_NUMBER}\"|" config.xml
-          grep -e '<widget ' -e android-versionCode config.xml
+        run: bin/stamp-version.sh "pr${PR_NUMBER}-${PR_HEAD_SHA:0:7}" "${GITHUB_RUN_NUMBER}"
 
       - name: Build debug APK
         run: bin/build.sh
