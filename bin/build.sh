@@ -16,6 +16,7 @@ PORTAL_ROOT="${PORTAL_ROOT:-https://tutor-web.net/}"
 AD_UNIT_ID_ANDROID="${AD_UNIT_ID_ANDROID:-ca-app-pub-3940256099942544/1033173712}"
 # The endpoint used to sync lectures
 SYNC_URI="${SYNC_URI:-/sync}"
+TW_QUIZ_BRANCH="${TW_QUIZ_BRANCH:-anonymous-app}"
 
 # Tutorials to bundle as seed content, so the app has drills before it has
 # talked to a server. Space-separated portal paths, e.g.
@@ -38,7 +39,7 @@ else
     SEED_SUBSCRIPTIONS=""
 fi
 
-[ -d "$QUIZ_CHECKOUT" ] || git clone https://github.com/tutor-web/tutorweb.quiz "$QUIZ_CHECKOUT"
+[ -d "$QUIZ_CHECKOUT" ] || git clone --branch "$TW_QUIZ_BRANCH" https://github.com/tutor-web/tutorweb.quiz "$QUIZ_CHECKOUT"
 make -C "$QUIZ_CHECKOUT"
 
 rm -rf "$WWW"
