@@ -42,9 +42,10 @@ Start with a topic, try a quiz and take the next step in your learning.
 
 ### Phone screenshots (min 2, max 8; JPEG or 24-bit PNG)
 
-**TODO:** Capture from a real signed build once the production AdMob
-IDs are in (see build checklist). Suggested shots: start/home screen, an
-active quiz, and the SmileyCoin reward screen.
+Should be 9:16 ratio (i.e. LG G6 without OS chrome)
+
+    listing/screenshot.1.png
+    listing/screenshot.2.png
 
 ### Category
 
