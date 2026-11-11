@@ -12,7 +12,7 @@ QUIZ_CHECKOUT="$HERE/tutorweb.quiz"
 QUIZ_RES="$QUIZ_CHECKOUT/tutorweb/quiz/resources"
 WWW="$HERE/www"
 
-BACKEND_ROOT="${BACKEND_ROOT:-https://app-backend.tutor-web.net/}"
+BACKEND_ROOT="${BACKEND_ROOT:-https://app-backend.smileytutor.is/}"
 AD_UNIT_ID_ANDROID="${AD_UNIT_ID_ANDROID:-ca-app-pub-3940256099942544/1033173712}"
 # The endpoint used to sync lectures
 SYNC_URI="${SYNC_URI:-/sync}"
