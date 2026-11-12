@@ -121,10 +121,15 @@ fi
 echo "Built $HERE/platforms/android/app/build/outputs/apk/debug/app-debug.apk"
 
 if [ "$1" = "release" ]; then
-  : "${ANDROID_KEYSTORE-$HERE/upload-keystore.jks}"
+  : "${ANDROID_KEYSTORE:=$HERE/upload-keystore.jks}"
   : "${ANDROID_KEYSTORE_PASSWORD:?Set ANDROID_KEYSTORE_PASSWORD}"
-  : "${ANDROID_KEY_ALIAS-smileytutor}"
-  : "${ANDROID_KEY_PASSWORD-${ANDROID_KEYSTORE_PASSWORD}}"
+  : "${ANDROID_KEY_ALIAS:=smileytutor}"
+  : "${ANDROID_KEY_PASSWORD:=${ANDROID_KEYSTORE_PASSWORD}}"
+
+  [ -f "$ANDROID_KEYSTORE" ] || {
+      echo "No keystore at $ANDROID_KEYSTORE" >&2
+      exit 1
+  }
 
   BUILD_JSON="$BUILD_DIR/release.json"
   cat > "$BUILD_JSON" <<JSON
@@ -141,7 +146,52 @@ if [ "$1" = "release" ]; then
 JSON
 
   npx cordova build android --release --buildConfig="$BUILD_JSON" -- --packageType=bundle
-  echo "Built $HERE/platforms/android/app/build/outputs/bundle/release/app-release.aab"
+  RELEASE_AAB="$HERE/platforms/android/app/build/outputs/bundle/release/app-release.aab"
+  # We produce app-release.aab regardless of signing, make sure it's
+  # actually signed before continuing
+  command -v jarsigner >/dev/null || {
+      echo "jarsigner (from the JDK) is needed to check $RELEASE_AAB is signed" >&2
+      exit 1
+  }
+  jarsigner -verify "$RELEASE_AAB" | grep -q '^jar verified' || {
+      echo "$RELEASE_AAB is not signed - did the signing config apply?" >&2
+      jarsigner -verify "$RELEASE_AAB" >&2 || true
+      exit 1
+  }
+  # Given it's signed, also check that it matches the certificate we're using
+  command -v unzip >/dev/null || {
+      echo "unzip is needed to check which key signed $RELEASE_AAB" >&2
+      exit 1
+  }
+  # The signature block is named after the alias, truncated to 8 characters,
+  # hence the wildcard rather than a literal name
+  AAB_CERT_SHA256="$(unzip -p "$RELEASE_AAB" 'META-INF/*.RSA' |
+      keytool -printcert |
+      sed -n 's/^[[:space:]]*SHA256:[[:space:]]*//p' |
+      head -n 1 | tr 'a-f' 'A-F')"
+  KEYSTORE_CERT_SHA256="$(keytool -list \
+      -keystore "$ANDROID_KEYSTORE" \
+      -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+      -alias "$ANDROID_KEY_ALIAS" |
+      sed -n 's/.*SHA-256): *//p' | head -n 1 | tr 'a-f' 'A-F')"
+  # Both sides are scraped from keytool, so anything that changed its output
+  # would empty both and compare equal. Fail on an empty one instead.
+  [ -n "$AAB_CERT_SHA256" ] || {
+      echo "Could not read the signing certificate of $RELEASE_AAB" >&2
+      exit 1
+  }
+  [ -n "$KEYSTORE_CERT_SHA256" ] || {
+      echo "Could not read certificate '$ANDROID_KEY_ALIAS' from $ANDROID_KEYSTORE" >&2
+      exit 1
+  }
+  [ "$AAB_CERT_SHA256" = "$KEYSTORE_CERT_SHA256" ] || {
+      echo "$RELEASE_AAB was not signed by '$ANDROID_KEY_ALIAS' in $ANDROID_KEYSTORE" >&2
+      echo "  keystore SHA256: $KEYSTORE_CERT_SHA256" >&2
+      echo "  bundle   SHA256: $AAB_CERT_SHA256" >&2
+      exit 1
+  }
+
+  echo "Built $RELEASE_AAB, signed by $AAB_CERT_SHA256"
 
   # And an APK signed with the same key. The bundle is a Play upload format
   # that cannot be installed on a device, so without this a tagged release
