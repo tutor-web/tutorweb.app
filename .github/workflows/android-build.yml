@@ -24,6 +24,9 @@
 #
 # Optional *repository* variables, passed through to bin/build.sh
 #
+#   AD_UNIT_ID_ANDROID — the AdMob unit ads are requested from. Defaults
+#     to Google's test unit, which only ever serves test ads.
+#
 #   BACKEND_ROOT — the backend the app talks to (NB: not Plone)
 #
 #   SEED_ROOT — where seed content is fetched from, defaults to tutor-web.net
@@ -129,6 +132,7 @@ jobs:
         run: bin/build.sh
         env:
           TW_DUMP_KEY: ${{ secrets.TW_DUMP_KEY }}
+          AD_UNIT_ID_ANDROID: ${{ vars.AD_UNIT_ID_ANDROID }}
           BACKEND_ROOT: ${{ vars.BACKEND_ROOT }}
           SEED_ROOT: ${{ vars.SEED_ROOT }}
           SEED_TUTORIALS: ${{ vars.SEED_TUTORIALS }}
@@ -140,6 +144,7 @@ jobs:
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           TW_DUMP_KEY: ${{ secrets.TW_DUMP_KEY }}
+          AD_UNIT_ID_ANDROID: ${{ vars.AD_UNIT_ID_ANDROID }}
           BACKEND_ROOT: ${{ vars.BACKEND_ROOT }}
           SEED_ROOT: ${{ vars.SEED_ROOT }}
           SEED_TUTORIALS: ${{ vars.SEED_TUTORIALS }}
@@ -260,6 +265,7 @@ jobs:
         # bin/build.sh would fail rather than quietly ship an unseeded app.
         run: bin/build.sh
         env:
+          AD_UNIT_ID_ANDROID: ${{ vars.AD_UNIT_ID_ANDROID }}
           BACKEND_ROOT: ${{ vars.BACKEND_ROOT }}
           SEED_ROOT: ${{ vars.SEED_ROOT }}
 
