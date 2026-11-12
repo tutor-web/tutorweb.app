@@ -71,12 +71,8 @@ promotional placements; no signal either way in this repo.
 
 ### Privacy Policy URL
 
-https://github.com/tutor-web/tutorweb.app/blob/main/privacy.md
+https://app-backend.smileytutor.is/privacy
 
-The same URL `view.js:435` opens from the in-app menu, so the two cannot
-drift apart. NB a GitHub blob URL renders a page wrapped in GitHub's own
-chrome; if Play or a reviewer objects, host `privacy.md` on
-smileytutor.is and change both places together.
 
 ### Ads declaration
 
@@ -149,9 +145,7 @@ Notes for whoever fills the form in:
 - **Encrypted in transit:** Yes — TLS to the backend (`install_nginx.sh`),
   and Google Play services for ads.
 - **Users can request deletion:**
-  https://github.com/tutor-web/tutorweb.app/blob/main/privacy.md#data-deletion
-  (lower-case anchor; `privacy.md` now uses `##` headings, so this
-  resolves. It did not when the sections were bold text.)
+  https://app-backend.smileytutor.is/privacy#data-deletion
 - Do **not** declare an email address or any other personal info. The
   login/JWT paths in `ajaxapi.js` belong to the Plone website build and
   are unreachable in an app build, where `twConfig.seedSubscriptions` is
