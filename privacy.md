@@ -18,7 +18,7 @@ The Application has no accounts and no sign-in. It never asks for your name, ema
 
 The first time you open the Application it asks you to accept these terms, and then registers an anonymous identifier with the Service Provider's server. From that point the Application holds:
 
-*   **An anonymous identifier.** A random identifier (a "UUID") issued by the server on first run and stored on your device. It is not derived from your device, your hardware or anything about you, and it is not linked to any name or contact details. It is how the server recognises that two drills were answered by the same person. Registration is not optional: the Application needs the identifier and the drill settings issued alongside it in order to work at all. You can delete it, and everything filed under it, at any time by choosing "Delete my data" from the Application's menu — see **Data Deletion**. You can also see it, under "Your SmileyTutor ID" on the Application's SmileyCoin page.
+*   **An anonymous identifier.** A random identifier (a "UUID") issued by the server on first run and stored on your device. It is not derived from your device, your hardware or anything about you, and it is not linked to any name or contact details. It is how the server recognises that two drills were answered by the same person. Registration is not optional: the Application needs the identifier and the drill settings issued alongside it in order to work at all. You can see it under "Your SmileyTutor ID" on the Application's SmileyCoin page, and you will need it to ask for your data to be deleted — see **Data Deletion**.
 *   **Your drill settings.** A set of values drawn for you when you register, which control how questions are chosen and how your grade moves. They are fixed at registration so that a grade means the same thing throughout.
 *   **Your answers and your grades.** For each question you answer: which question it was, when it was shown to you and when you answered, whether you were right, whether it was a practice question, the grade that followed, how many SmileyCoins it earned, and integrity hashes that let the server detect whether a record has been altered in transit.
 *   **A SmileyCoin wallet address, if you choose to claim.** Only if and when you ask to be paid your SmileyCoins, and only the address you type in yourself. See **SmileyCoin payments** below.
@@ -87,11 +87,10 @@ years to redeem what you have earned. What happens at that point:
     project** — the same destination the Application's own donate button
     offers. It is not quietly discarded, and it is not kept by the Service
     Provider.
-*   **If you delete your data yourself**, using "Delete my data", any
-    unredeemed balance is lost rather than donated. The Application warns you
-    and shows the amount before you confirm, and offers to take you to the
-    redeem page first, so that redeeming or donating it is your choice to
-    make.
+*   **If you ask for your data to be deleted**, any unredeemed balance is
+    lost rather than donated, because deleting the answers removes the proof
+    that it was earned. Redeem or donate your balance first if you want to
+    keep it.
 
 The reason a balance cannot simply be held for you indefinitely is that your
 answers are the record of having earned it. Once those are deleted, there is
@@ -163,12 +162,12 @@ Note separately that the SmileyCoin blockchain is distributed worldwide and is n
 
 Because the Application has no account to close, the ways to stop it collecting anything are:
 
-*   **Choose "Delete my data" from the Application's menu.** This deletes everything the Service Provider holds about you, from the Application, straight away. See **Data Deletion** below.
-*   **Uninstall the Application**, or stop using the website. This stops any further collection immediately. It does not delete what has already been sent, and once the Application is gone your identifier is gone with it, so neither you nor the Service Provider can find your records in order to delete them on request. They are deleted automatically after 24 months of inactivity instead (see **What is the data retention policy**), and any unredeemed SmileyCoin is donated at that point. If you would rather not wait, delete your data before uninstalling.
+*   **Ask for your data to be deleted**, by email, quoting your SmileyTutor ID. See **Data Deletion** below.
+*   **Uninstall the Application**, or stop using the website. This stops any further collection immediately. It does not delete what has already been sent, and once the Application is gone your identifier is gone with it, so neither you nor the Service Provider can find your records in order to delete them on request. They are deleted automatically after 24 months of inactivity instead (see **What is the data retention policy**), and any unredeemed SmileyCoin is donated at that point. If you would rather not wait, ask for deletion before uninstalling.
 *   **Reset your device's advertising identifier**, or opt out of ad personalisation, in your device's own privacy settings. This affects what Google receives.
 *   **Simply never claim.** No wallet address is recorded unless you choose to claim your SmileyCoin.
 
-To exercise any other right, contact the Service Provider at smileytutor.admin@gmail.com.
+To exercise any other right, contact the data controller with the e-mail address at the top.
 
 ## What is the data retention policy and how can you manage your information?
 
@@ -183,9 +182,9 @@ To exercise any other right, contact the Service Provider at smileytutor.admin@g
 
 You do not have to ask. The Service Provider's server runs a nightly job that
 deletes every record of any user whose copy of the Application has not been in
-touch for 24 months. It removes exactly what the "Delete my data" button
-removes: your answers, your grades, your identifier and the drill settings
-issued with it.
+touch for 24 months. It removes the same things a deletion request does:
+your answers, your grades, your identifier and the drill settings issued
+with it.
 
 So if you stop using the Application and never come back — or uninstall it
 without deleting your data first — your records do not sit there
@@ -204,27 +203,11 @@ SmileyCoin transactions published to the blockchain are permanent and are not su
 
 ## Data Deletion
 
-### Delete it yourself, from the Application
+To have your data deleted, **email the data controller and include your SmileyTutor ID.** Your request will be processed within the timeframes required by applicable law.
 
-**Open the menu and choose "Delete my data".** The page tells you exactly what will go, and asks you to confirm. Nothing is deleted until you do.
+You will find your SmileyTutor ID on the Application's SmileyCoin page, reached by "Redeem your smileycoins" in the menu.
 
-When you confirm, the Service Provider's server deletes your answers, your grades, your identifier and the drill settings issued with it, and the Application deletes its own copies from your device at the same time. There is nothing to write, nobody to wait for, and no need to tell anyone who you are — the Application already knows which records are yours. Your drills simply start again from the beginning with a new identifier.
-
-Two things to know before you use it:
-
-*   **It cannot be undone**, by you or by the Service Provider. There is no backup copy to restore from and no way to identify you afterwards in order to restore one.
-*   **Unredeemed SmileyCoin is lost**, because the answers that earned it are the proof that it was earned. The page warns you and shows the amount if you have any, and offers to take you to the redeem page first. Redeeming or donating before you delete is the way to keep it.
-
-### Or ask the Service Provider
-
-You do not have to use the Application to make a request. You can contact the Service Provider at smileytutor.admin@gmail.com instead, and it will be processed within the timeframes required by applicable law. This route is slower, and in this Application it also needs more care from you, because the Service Provider deliberately holds nothing that identifies you:
-
-*   **Include your identifier in the request**, or your records cannot be found. You will find it under "Your SmileyTutor ID" on the Application's SmileyCoin page, reached by "Redeem your smileycoins" in the menu.
-*   Because that identifier is the only key, the Service Provider will act on a request that quotes a valid one. It cannot further verify that the requester is the person whose device it came from — which is one reason the in-app route above is the better one: it proves the request comes from the device the identifier belongs to.
-*   **An email containing your identifier is worth treating as confidential.** Anyone who reads it could redeem your SmileyCoin, for as long as the identifier is live. Deleting your data from the Application makes the identifier worthless to anyone, which is another reason to prefer it.
-*   If you have already uninstalled the Application, or cleared its data, neither route can help: your identifier is gone, and with it any way of finding your records. They will be deleted automatically 24 months after your last use, and any unredeemed SmileyCoin donated at that point — but nothing can single them out before then. If you want your answers removed sooner than that, delete them before uninstalling.
-
-### Either way
+### What cannot be deleted
 
 Payments already made to the SmileyCoin blockchain cannot be deleted, by the Service Provider or by anyone else; see **SmileyCoin payments**. The Service Provider's own record of such a payment is kept for as long as accounting law requires, with the link to you removed.
 
@@ -256,15 +239,21 @@ You should also understand the following, which is a deliberate consequence of t
 *   For this reason the identifier is treated as confidential: it is sent only over encrypted connections, and the Service Provider does not retain it in request logs during normal operation.
 *   The records reachable this way are your drill answers, your grades and your SmileyCoin balance. They contain no name, contact details or payment credentials, because none are collected.
 
-If you believe your identifier has been exposed, choose "Delete my data" from the Application's menu. That deletes the records it reaches and issues you a new identifier on your next drill, which leaves the old one worth nothing to whoever has it. Uninstalling and reinstalling also issues a new identifier, but leaves your old records in place with no way left to delete them.
+If you believe your identifier has been exposed, ask for your data to be deleted (see **Data Deletion**) and redeem any SmileyCoin you are owed first. Uninstalling and reinstalling issues you a new identifier, but leaves your old records in place under the old one — so ask for the deletion before you do that, while you still have the ID a request has to quote.
 
 ## Data Breach Notification
 
-In the event of a personal data breach that poses a risk to your rights and freedoms, the Service Provider will notify the relevant supervisory authority within 72 hours of becoming aware of the breach, as required by applicable law. Where the breach is likely to result in a high risk to your rights and freedoms, the Service Provider will also notify users without undue delay — within the Application, since it holds no contact details through which it could write to you — providing information about the nature of the breach, the categories of data affected, and the measures taken.
+In the event of a personal data breach that poses a risk to your rights and freedoms, the Service Provider will notify the relevant supervisory authority within 72 hours of becoming aware of the breach, as required by applicable law.
+
+Where the breach is likely to result in a high risk to your rights and freedoms, the Service Provider will also notify you without undue delay. Because no email address or other contact detail is held for anybody, this notice appears **inside the Application**: a message at the top of the page, on every screen, the next time you open it. It will say what happened, what kinds of data were affected and what is being done about it. You can dismiss it once you have read it, and if the message is later corrected or updated the new version appears again.
+
+The same channel is used to tell you about material changes to this Privacy Policy.
 
 ## How will you be informed of changes to this Privacy Policy?
 
-The Service Provider may update this Privacy Policy from time to time, and will notify you of material changes by posting the updated Privacy Policy with a new effective date. The Application links to this policy from its menu and shows it before you first register.
+The Service Provider may update this Privacy Policy from time to time, and will post the updated version with a new effective date. The Application links to this policy from its menu and shows it before you first register.
+
+Where a change is material, you will not have to go looking for it: a message appears at the top of the page inside the Application, as described under **Data Breach Notification**, the next time you open it.
 
 Previous versions of this Privacy Policy are available in the version history of the repository this file lives in, and on request by contacting the Service Provider at smileytutor.admin@gmail.com.
 
@@ -276,14 +265,14 @@ Under the GDPR, you have the following rights:
 
 *   **Right of Access:** You can request a copy of the data held under your anonymous identifier.
 *   **Right to Rectification:** You can request correction of inaccurate data.
-*   **Right to Erasure:** You can delete your data yourself, from the Application's menu, without asking anyone — or ask the Service Provider to do it. Both routes, and their limits, are described under **Data Deletion**; in particular, payments already written to the blockchain cannot be erased by anyone.
+*   **Right to Erasure:** You can ask the Service Provider to delete your data, by email, quoting your SmileyTutor ID. The route and its limits are described under **Data Deletion**; in particular, payments already written to the blockchain cannot be erased by anyone.
 *   **Right to Restrict Processing:** You can request that the Data Controller limits how it uses your data.
 *   **Right to Data Portability:** You can request a copy of your data in a structured, commonly used, machine-readable format.
 *   **Right to Object:** You can object to processing based on legitimate interests, including the use of anonymised answer data for educational research.
 *   **Right to Withdraw Consent:** The Service Provider does not rely on consent for any processing, so there is no consent to withdraw. If this changes, this policy will say so and a means of withdrawal will be provided in the Application.
 *   **Rights Regarding Automated Decision-Making:** See **Automated decision-making** above.
 
-Erasure aside, exercising these rights requires the Service Provider to be able to find your records; please see **Data Deletion** for what to include in a request.
+Exercising any of these rights requires the Service Provider to be able to find your records; please see **Data Deletion** for what a request has to include.
 
 If you believe your data protection rights have been violated, you have the right to lodge a complaint with your local Data Protection Authority. Contact details for each country's Data Protection Authority can be found at [https://edpb.ec.europa.eu/about-edpb/members_en](https://edpb.ec.europa.eu/about-edpb/members_en)
 
