@@ -27,7 +27,7 @@ The first time you open the Application it asks you to accept these terms, and t
 
 *   To run the Application: choosing your next question, working out your grade, and keeping your progress when you move between devices or reinstall.
 *   To work out and pay the SmileyCoin your drills have earned.
-*   For educational research, in anonymised and aggregated form, as the Application's terms of use state when you first open it. Research outputs describe groups of learners, never an individual.
+*   For educational research, as the Application's terms of use state when you first open it. While you are using the Application the research works on aggregates; once you have been inactive for 24 months your answers are stripped of your identity and kept for research in that form — see **What is the data retention policy**. Research outputs describe groups of learners, never an individual.
 *   To keep the service secure and to detect abuse of the SmileyCoin rewards.
 
 The Service Provider does not send marketing communications, newsletters or promotional messages of any kind, and holds no contact details with which it could.
@@ -37,7 +37,8 @@ The Service Provider does not send marketing communications, newsletters or prom
 Where the GDPR applies, the Service Provider relies on the following lawful bases:
 
 *   **Contract performance:** processing your anonymous identifier, drill settings, answers and grades in order to provide the Application you have asked to use, and to pay out SmileyCoin you have claimed.
-*   **Legitimate interests:** anonymising answer data for educational research; maintaining network and information security; preventing fraud and abuse of the SmileyCoin rewards. These interests are balanced against your rights, and because the Application's users are minors the balance is struck conservatively — the data involved is behavioural learning data rather than anything identifying, and the research use works on anonymised aggregates.
+*   **Legitimate interests:** maintaining network and information security, and preventing fraud and abuse of the SmileyCoin rewards. These interests are balanced against your rights, and because the Application's users are minors the balance is struck conservatively.
+*   **Scientific research:** keeping your answers, with your identity removed from them, for educational research. Art 5(1)(b) of the GDPR treats further processing for scientific research as compatible with the purpose data was collected for, and Art 5(1)(e) permits it to be kept for longer on that basis, subject to the safeguards in Art 89(1). What those safeguards are in practice is set out under **What is the data retention policy**.
 *   **Legal obligation:** to comply with laws, including retaining records of payments made where accounting law requires it.
 
 The Service Provider does not rely on consent as a lawful basis for any processing, because it operates no consent-based features: there is no marketing, no analytics SDK, and no interest-based advertising. See **Advertising** below for how advertising is configured instead.
@@ -81,12 +82,13 @@ Donating your balance to the Education in a Suitcase project, which the Applicat
 The Application tells you, on the redeem page, that you have a maximum of two
 years to redeem what you have earned. What happens at that point:
 
-*   **If you stop using the Application**, your records are deleted after 24
-    months of inactivity (see **What is the data retention policy**). Anything
-    you had not redeemed by then is **donated to the Education in a Suitcase
-    project** — the same destination the Application's own donate button
-    offers. It is not quietly discarded, and it is not kept by the Service
-    Provider.
+*   **If you stop using the Application**, your record is anonymised after
+    24 months of inactivity (see **What is the data retention policy**).
+    Anything you had not redeemed by then is **donated to the Education in a
+    Suitcase project** — the same destination the Application's own donate
+    button offers. It is not quietly discarded, and it is not kept by the
+    Service Provider. It has to be moved at that point rather than held,
+    because afterwards there is no identity left that could claim it.
 *   **If you ask for your data to be deleted**, any unredeemed balance is
     lost rather than donated, because deleting the answers removes the proof
     that it was earned. Redeem or donate your balance first if you want to
@@ -163,7 +165,7 @@ Note separately that the SmileyCoin blockchain is distributed worldwide and is n
 Because the Application has no account to close, the ways to stop it collecting anything are:
 
 *   **Ask for your data to be deleted**, by email, quoting your SmileyTutor ID. See **Data Deletion** below.
-*   **Uninstall the Application**, or stop using the website. This stops any further collection immediately. It does not delete what has already been sent, and once the Application is gone your identifier is gone with it, so neither you nor the Service Provider can find your records in order to delete them on request. They are deleted automatically after 24 months of inactivity instead (see **What is the data retention policy**), and any unredeemed SmileyCoin is donated at that point. If you would rather not wait, ask for deletion before uninstalling.
+*   **Uninstall the Application**, or stop using the website. This stops any further collection immediately. It does not delete what has already been sent, and once the Application is gone your identifier is gone with it, so neither you nor the Service Provider can find your records in order to delete them on request. After 24 months of inactivity your identity is removed from them automatically and your answers are kept for research (see **What is the data retention policy**), with any unredeemed SmileyCoin donated at that point. **If you want your answers deleted rather than anonymised, ask before uninstalling** — it cannot be done afterwards.
 *   **Reset your device's advertising identifier**, or opt out of ad personalisation, in your device's own privacy settings. This affects what Google receives.
 *   **Simply never claim.** No wallet address is recorded unless you choose to claim your SmileyCoin.
 
@@ -173,31 +175,32 @@ To exercise any other right, contact the data controller with the e-mail address
 
 | Data | Retained for |
 |---|---|
-| Anonymous identifier, drill settings, answers and grades | While you are using the Application, and for 24 months after the last time it contacted the server. Then deleted automatically. |
-| Records of SmileyCoin payments (amount, wallet address, transaction id) | As long as required by applicable accounting and anti-fraud obligations. The link between the payment and you is removed when your records are deleted. |
+| Your identifier, and the link between it and your answers | While you are using the Application, and for 24 months after the last time it contacted the server. Then removed — see below. |
+| Your answers, grades and drill settings | Kept, under an identifier that is no longer yours, for educational research |
+| Records of SmileyCoin payments (amount, wallet address, transaction id) | As long as required by applicable accounting and anti-fraud obligations, separately from the answers |
 | Web server logs containing IP addresses | 14 days |
-| Anonymised, aggregated research data | Indefinitely, as it no longer identifies you |
 
-### Deletion after 24 months happens by itself
+### After 24 months of inactivity, your record stops being yours
 
-You do not have to ask. The Service Provider's server runs a nightly job that
-deletes every record of any user whose copy of the Application has not been in
-touch for 24 months. It removes the same things a deletion request does:
-your answers, your grades, your identifier and the drill settings issued
-with it.
+The Service Provider's server runs a nightly job over every user whose copy of the Application has not been in touch for 24 months. You do not have to ask for it and cannot opt out of it.
 
-So if you stop using the Application and never come back — or uninstall it
-without deleting your data first — your records do not sit there
-indefinitely. The job runs nightly, so they are removed within a few days of
-the 24-month mark.
+It does not delete what you answered. It takes your identity off it. Three things change at once:
 
-Two consequences worth knowing:
+*   **Your identifier is replaced** with a fresh one that belongs to nobody and cannot be used by anybody. No record is kept of which identifier it replaced, so there is nothing to join the two back together.
+*   **The times are coarsened.** Each answer recorded the moment the question was put in front of you, to the second; that is rounded to the nearest day. How long you took over each question is kept, because that is what the research is about.
 
-*   **Any SmileyCoin you never redeemed is donated when this happens**, rather
-    than simply discarded. See **SmileyCoin payments** below.
-*   **It is not reversible and there is no backup.** Coming back to the
-    Application after more than 24 months away means starting from the
-    beginning with a new identifier, with no way to recover your old progress.
+What survives is which questions were answered, whether each was right, the grade that followed and how long each took — a record of learning with the learner removed.
+
+tutor-web exists to research how people learn, and the sequence of a student's answers is the thing being researched: which questions, in what order, right or wrong, and how the grade moved. Deleting it after two years would throw away the point of the project. Anonymising it keeps the learning and discards the learner.
+
+The GDPR provides for this directly. Art 5(1)(b) treats further processing for scientific research as compatible with the purpose data was collected for, and Art 5(1)(e) permits data to be kept for longer where it will be processed solely for scientific research subject to the safeguards in Art 89(1). Removing the identifier, coarsening the times and rewriting the hashes are those safeguards.
+
+### What this means for you
+
+*   **Ask before two years are up, if you want deletion rather than this.** Once your record has been anonymised, neither you nor the Service Provider can find it: your identifier is gone and nothing maps the new one back to it.
+*   **It cannot be reversed.** Coming back to the Application after more than 24 months away means starting from the beginning with a new identifier, and no way to recover your old progress.
+*   **Any SmileyCoin you never redeemed is donated first**, rather than discarded — see **SmileyCoin payments**. It has to happen first, because afterwards there is no identity left that could claim it.
+*   **Your payment record is kept apart from your answers.** Where you claimed SmileyCoin, the record of that payment stays for as long as accounting law requires, but it is not filed with the anonymised answers — so the wallet address you gave is not attached to the record of what you answered.
 
 SmileyCoin transactions published to the blockchain are permanent and are not subject to any retention period the Service Provider can set; see **SmileyCoin payments**.
 
@@ -206,6 +209,8 @@ SmileyCoin transactions published to the blockchain are permanent and are not su
 To have your data deleted, **email the data controller and include your SmileyTutor ID.** Your request will be processed within the timeframes required by applicable law.
 
 You will find your SmileyTutor ID on the Application's SmileyCoin page, reached by "Redeem your smileycoins" in the menu.
+
+After 24 months without the Application contacting the server, your identity is removed from your answers automatically and nothing maps the result back to you — so from that point there is nothing anybody can single out and delete. See **What is the data retention policy**.
 
 ### What cannot be deleted
 
@@ -227,7 +232,7 @@ The Service Provider does not knowingly collect personal data from children unde
 
 In the United Kingdom, the Application takes into account the standards of the ICO's Age Appropriate Design Code, given that all users of the Application are under 18.
 
-If you are a parent or guardian and believe your teenager has provided information in a way that concerns you, or that a user under 13 is using the Application, please contact the Service Provider (smileytutor.admin@gmail.com) so that the necessary actions, including deletion, can be taken.
+If you are a parent or guardian and believe your teenager has provided information in a way that concerns you, or that a user under 13 is using the Application, please contact the Service Provider so that the necessary actions, including deletion, can be taken.
 
 ## How is your information kept secure?
 
@@ -255,7 +260,7 @@ The Service Provider may update this Privacy Policy from time to time, and will 
 
 Where a change is material, you will not have to go looking for it: a message appears at the top of the page inside the Application, as described under **Data Breach Notification**, the next time you open it.
 
-Previous versions of this Privacy Policy are available in the version history of the repository this file lives in, and on request by contacting the Service Provider at smileytutor.admin@gmail.com.
+Previous versions of this Privacy Policy are available in the version history of the repository this file lives in, and on request by contacting the Service Provider.
 
 This privacy policy is effective as of 2026-11-11.
 
@@ -268,11 +273,11 @@ Under the GDPR, you have the following rights:
 *   **Right to Erasure:** You can ask the Service Provider to delete your data, by email, quoting your SmileyTutor ID. The route and its limits are described under **Data Deletion**; in particular, payments already written to the blockchain cannot be erased by anyone.
 *   **Right to Restrict Processing:** You can request that the Data Controller limits how it uses your data.
 *   **Right to Data Portability:** You can request a copy of your data in a structured, commonly used, machine-readable format.
-*   **Right to Object:** You can object to processing based on legitimate interests, including the use of anonymised answer data for educational research.
+*   **Right to Object:** You can object to processing based on legitimate interests. You can also object to your answers being kept for scientific research under Art 21(6) — ask before the 24-month mark, because afterwards there is no record that can be identified as yours to act on.
 *   **Right to Withdraw Consent:** The Service Provider does not rely on consent for any processing, so there is no consent to withdraw. If this changes, this policy will say so and a means of withdrawal will be provided in the Application.
 *   **Rights Regarding Automated Decision-Making:** See **Automated decision-making** above.
 
-Exercising any of these rights requires the Service Provider to be able to find your records; please see **Data Deletion** for what a request has to include.
+Exercising any of these rights requires the Service Provider to be able to find your records, which means quoting your SmileyTutor ID and asking before your record is anonymised — see **Data Deletion** and **What is the data retention policy**. Art 89(2) of the GDPR allows these rights to be limited where data is kept for scientific research and the rights would make that research impossible; the Service Provider does not rely on that, because after anonymisation there is simply no longer a record it can connect to you.
 
 If you believe your data protection rights have been violated, you have the right to lodge a complaint with your local Data Protection Authority. Contact details for each country's Data Protection Authority can be found at [https://edpb.ec.europa.eu/about-edpb/members_en](https://edpb.ec.europa.eu/about-edpb/members_en)
 
@@ -291,7 +296,7 @@ The Application does not sell personal information, and does not share it for cr
 *   **Right to Limit Use of Sensitive Personal Information:** The Application does not collect sensitive personal information as the CPRA defines it.
 *   **Right to Non-Discrimination:** The Service Provider will not discriminate against you for exercising any of your CCPA/CPRA rights.
 
-To exercise any of these rights, contact the Service Provider at smileytutor.admin@gmail.com. You may designate an authorized agent to make a request on your behalf.
+To exercise any of these rights, contact the Service Provider. You may designate an authorized agent to make a request on your behalf.
 
 ## How can you contact the Data Controller?
 
